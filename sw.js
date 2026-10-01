@@ -53,10 +53,14 @@ self.addEventListener('install', event => {
 });
 
 /* --- Activación: limpiar cachés antiguos y tomar el control --------- */
+// Solo borrar cachés de esta propia app (por prefijo): no tocar las cachés
+// del portal ni las de otras apps alojadas en subcarpetas del mismo dominio.
+const esCachePropia = (c) => c.startsWith('rubricas-app-');
+
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const claves = await caches.keys();
-    await Promise.all(claves.filter(c => c !== CACHE).map(c => caches.delete(c)));
+    await Promise.all(claves.filter(c => c !== CACHE && esCachePropia(c)).map(c => caches.delete(c)));
     await self.clients.claim();
   })());
 });
